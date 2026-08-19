@@ -1,0 +1,50 @@
+-To install this and register the menu in windows's registry,
+	so it appears in the context menu (the menu that appears when you right-click a file)
+
+-Run CMD, go to the path where you extracted the folder
+	e.g: "E:\\DMC5 Context Menu Tool"
+	
+-Enter this command: python context_installer.py
+	(and you have python installed of course, I used Python 3.14.4)
+		or just simply double click the python file if it is associated with python as the default app
+			no admin privileges needed
+
+-the tool leaves console window open when converting regardless of success or error, to be able to detect errors when they occur
+	so the user would've to close it manually
+
+-if you want to register, just type "yes" without quotes
+	the tool asks you to confirm before registering any path or key
+
+-it will register in the current user account only, if you use admin privileges (you ran CMD as adminstrator) 
+	it will register in the adminstrator account
+		if you are already running Windows as an Adminstrator account, it won't matter and still register to that adminstrator account
+
+-if you have registered and want to unregister,
+	run the command again, and when it asks, just type "no" without quotes
+		the tool asks you to confirm before unregistering any path or key
+
+-if you register you should see "RE Engine Texture (Convert to .dds)" when right-clicking a .dds file,
+	and "RE Engine Texture (Convert to .tex)" with cascading sub-menus for each game (DMC5 only for now) when right-clicking a RE Engine .tex file
+
+-Converted files will appear next to the file you wanted to convert
+	also if you check the windows registry editor you will find the keys and everything registered in the paths mentioned in Context Installer.py
+
+-if you unregister, you no longer see any of both clickable items mentioned above in the context menu
+	also if you check in the registry editor it should be deleted
+
+-The tool registers in certain paths in only one hive (HKEY_CURRENT_USER)
+
+-When un-registering, it removes only from the same HKEY_CURRENT_USER hive
+	For the sake of safe-guarding and security, there is conditions that if met, the tool will abort the unregister function and exit code
+		Such as the already-hardcoded path in ALL_PATHS being empty, or ending in one of the strings in IS_PATH_END
+
+-If something goes wrong, you can always check the hives and paths mentioned in "Context_Installer.py"
+	and use the default windows registry editor or Registry Workshop to inspect manually
+
+-Some paths to consider searching in, just in case something went wrong, and you want to register/unregister manually:
+	HKEY_CURRENT_USER\
+	HKEY_CURRENT_USER\Software
+	HKEY_CURRENT_USER\Software\Classes
+	HKEY_CURRENT_USER\Software\Classes\SystemFileAssociations\
+
+- Keywords: .dds, RE_Engine_Texture, .tex, Convert, DMC5, .11, or any game name or version you added by yourself to the entries

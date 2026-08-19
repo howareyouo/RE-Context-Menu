@@ -1,0 +1,14 @@
+###Version 1.0.2
+
+ - Changed the tool such that it sets the default value as "open", now when double-clicking the files, the default Windows's Open/Open With... will execute instead of the tool itself
+ - Changed the tool such that it bypasses Windows's 15 file limit through the value "MultiSelectModel"="Player", now more than 15 files can be selected and the tool will still show in the Context Menu
+
+
+### Version 1.0.1
+
+ - Settled on making the tool use ~pythonw.exe~ instead, which shows no console windows. However, this way if any errors occur we won't be able to catch them, unless the ~Convert.py~ script is ran normally from the CMD
+
+### Version 1.0.0
+
+ - Release
+
