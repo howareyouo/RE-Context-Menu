@@ -21,7 +21,6 @@ def read_bytes(f, format):
     match = re.search(r'\d+', format)
     return struct.unpack(format, f.read(int(match.group())))
 
-
 def write_ubyte(f, data):
     f.write(struct.pack("<B", data))
     
@@ -36,9 +35,6 @@ def write_uint64(f, data):
     
 def write_float(f, data):
     f.write(struct.pack("<f", data))
-
-
-
 
 def align_to_4(f, offset):
     alignment_bytes = (4 - (offset % 4)) % 4
@@ -57,5 +53,3 @@ def write_alignment_16(f, offset):
     alignment_bytes = (16 - (offset % 16)) % 16
     if alignment_bytes:
         f.write(b'\x00' * alignment_bytes)
-        
-    

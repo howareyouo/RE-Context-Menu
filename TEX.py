@@ -6,11 +6,6 @@ import re
 from dxgiFormat import *
 
 
-
-    
-
-
-
 class TEX:
     def __init__(self):
         self.Magic = b''
@@ -188,12 +183,4 @@ class TEX:
             write_uint(f, self.MipmapLinearSize[i])
             
         f.write(self.dataTEX)
-        
-        
-        
-        
-    
-        
-        
-        
-    
+

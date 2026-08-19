@@ -6,7 +6,6 @@ from pathlib import Path
 from DDS import *
 from TEX import *
 
-
 Versions = ["11", "34", "143221013"]
 
 def Convert(Filepath, Game, Version, DDS, TEX):

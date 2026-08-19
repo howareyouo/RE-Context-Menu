@@ -34,7 +34,6 @@ class DDS:
         self.arraySize = 0
         self.miscFlags2 = 0
        
-       
         self.Caps = 0
         self.Caps2 = 0
         self.Caps3 = 0
@@ -68,8 +67,6 @@ class DDS:
         
         if self.FourCC == b"DX10":
             self.ReadDXGIFormat(f)
-        
-        
         
         
         
@@ -122,7 +119,6 @@ class DDS:
         if self.Depth > 1:
             self.Flags |= 0x800000
             
-        
         self.MipmapCount = TEX.MipmapCount
         
         if self.MipmapCount > 1:
@@ -132,16 +128,12 @@ class DDS:
         if self.MipmapCount > 1 or self.Depth > 1:
             self.Caps |= 0x8
             
-            
         self.Reserved = b'\x00' * 11 * 4
         
         #Pixel Format
         self.SizePF = 32
         self.FlagsPF = 0x4
         self.FourCC = b"DX10"
-        
-        
-        
           
 
         self.Caps2 = 0
@@ -173,7 +165,6 @@ class DDS:
         f.write(self.Reserved)
         self.WriteDDSPixelFormat(f)
         
-        
             
         write_uint(f, self.Caps)
         write_uint(f, self.Caps2)
@@ -182,7 +173,6 @@ class DDS:
         write_uint(f, self.Reserved2)
         
         self.WriteDXGIFormat(f)
-    
     
     
     def WriteDDSPixelFormat(self, f):
