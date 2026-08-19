@@ -1,7 +1,6 @@
 import struct
 import re
 import math
-import numpy as np   
 
 def read_ubyte(f):
     return struct.unpack("<B", f.read(1))[0]

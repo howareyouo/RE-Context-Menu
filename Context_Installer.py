@@ -21,9 +21,10 @@ EXTENSIONS = [
 ]
 
 for game in EXTENSIONS:
-    ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\AI Upscale")
     ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\Convert to DDS")
+    ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\AI Upscale")
     ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\Convert to PNG")
+    ALL_PATHS.append("SOFTWARE\\Classes\\SystemFileAssociations\\.png\\shell\\Convert to TEX")
             
 # ===================================================
 
@@ -153,6 +154,36 @@ def add_dds_context_menu(Extensions):
         print(f"✗ Failed {e}")
  
  
+def add_png_to_tex_context_menu():
+    """Register the Convert to TEX menu item for .png files (converts directly to RE4R .tex.143221013)"""
+    try:
+        png_to_tex_script = os.path.join(os.path.dirname(get_script_path()), "Convert_PNG2TEX.py")
+        if not os.path.exists(png_to_tex_script):
+            print(f"✗ Could not find {png_to_tex_script}, skipping PNG to TEX menu")
+            return
+
+        png_shell_key = "SOFTWARE\\Classes\\SystemFileAssociations\\.png\\shell"
+        with reg.CreateKey(reg.HKEY_CURRENT_USER, png_shell_key) as key:
+            reg.SetValueEx(key, "", 0, reg.REG_SZ, "open")  # Default action stays "open" (image viewer)
+
+        menu_key = png_shell_key + "\\Convert to TEX"
+        with reg.CreateKey(reg.HKEY_CURRENT_USER, menu_key) as key:
+            reg.SetValueEx(key, "Position", 0, reg.REG_SZ, "Bottom")  # Place at the bottom
+            reg.SetValueEx(key, "MultiSelectModel", 0, reg.REG_SZ, "Player")  # Bypass Windows 15-file limit
+
+        command_key = menu_key + "\\command"
+        with reg.CreateKey(reg.HKEY_CURRENT_USER, command_key) as key:
+            # Use the console-enabled python.exe so conversion progress and errors are visible
+            python_path = get_python_console_path()
+            command_line = f'"{python_path}" "{png_to_tex_script}" "%1"'
+            reg.SetValueEx(key, "", 0, reg.REG_SZ, command_line)
+
+        print(f"✓ Registered PNG to TEX Menu (RE4R).")
+
+    except Exception as e:
+        print(f"✗ Failed {e}")
+
+
 def add_upscale_context_menu(Extensions):
     """Register the AI Upscale context menu item for each game's .tex.{version}, install directly without per-item prompts"""
     try:
@@ -260,28 +291,32 @@ def delete_key(root, path):
     
 
 def remove_context_menu(games):
-    try:             
+    try:
+        # 列出所有待删除路径（不存在的路径跳过）
+        existing_paths = []
         for path in ALL_PATHS:
-            print_key_info = print_key(reg.HKEY_CURRENT_USER, path)
-                
-            if print_key_info == False:
-                continue
-                    
-            uninstall = input("Are you sure you want to delete/unregister this path (key) ? (yes/no)\n")
+            if print_key(reg.HKEY_CURRENT_USER, path):
+                existing_paths.append(path)
+
+        if not existing_paths:
+            print("No registered keys found, nothing to unregister.")
+            return
+
+        uninstall = input("Are you sure you want to delete/unregister all these keys? (yes/no)\n")
+        print()
+        if uninstall != "yes":
+            print("Nothing has been removed from registry.")
             print()
-            if uninstall == "yes":
-                if path == "" or path.split("\\")[-1].upper() in IS_PATH_END: # Safe-guard. Check if path is empty or its uppercase format ends in any of the string elements inside IS_PATH_END List
-                    print("You can't unregister/delete this !!. Aborting...")
-                    return
-                
-                delete_key(reg.HKEY_CURRENT_USER, path)
-                print("✓ Successfully removed key from registry")
-                print()
-                
-            else:
-                print("Key/path hasn't been removed from registry")
-                print()
-                
+            return
+
+        for path in existing_paths:
+            if path == "" or path.split("\\")[-1].upper() in IS_PATH_END: # Safe-guard. Check if path is empty or its uppercase format ends in any of the string elements inside IS_PATH_END List
+                print("You can't unregister/delete this !!. Aborting...")
+                return
+
+            delete_key(reg.HKEY_CURRENT_USER, path)
+            print()
+
         return
 
     except PermissionError:
@@ -317,7 +352,10 @@ def build_install_paths(Extensions):
 
     for game in Extensions:
         paths.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\.dds\\shell\\Convert to TEX\\shell\\{game[0]}\\command")
-        
+
+    # PNG to TEX (single menu item, converts to RE4R directly)
+    paths.append("SOFTWARE\\Classes\\SystemFileAssociations\\.png\\shell\\Convert to TEX\\command")
+
     return paths
 
 
@@ -343,6 +381,7 @@ def main():
         add_upscale_context_menu(games)
         add_dds_context_menu(games)
         add_png_context_menu(games)
+        add_png_to_tex_context_menu()
  
     elif register == "n":
             remove_context_menu(games)
