@@ -16,25 +16,22 @@ TEXCONV = os.path.join(TOOL_DIR, "bin", "texconv.exe")
 # Topaz Gigapixel AI executable candidate paths (tried in order)
 TOPAZ_CANDIDATES = [
     r"F:\Program Files\Topaz Gigapixel AI\gigapixel.exe",
-    r"C:\Program Files\Topaz Labs LLC\Topaz Gigapixel AI\Topaz Gigapixel AI.exe",
-    r"C:\Program Files\Topaz Gigapixel AI\gigapixel.exe",
+    r"C:\Program Files\Topaz Labs LLC\Topaz Gigapixel AI\gigapixel.exe",
 ]
 
-# Topaz output filename suffix (default _2x, configurable in Topaz preferences; auto-scanned if not found)
-DEFAULT_SUFFIX = "_2x"
-# Backup suffix for original file after upscale (appended to filename stem, before extension; extension unchanged)
+# Backup suffix for original file after upscale (appended after full filename, extension preserved)
 BACKUP_TAG = "_bak"
 
 
 def find_topaz():
-    """Find Topaz executable: prefer env var, then candidate paths"""
+    """Find Topaz executable: prefer env var, then candidate paths, then system PATH"""
     env = os.environ.get("TOPAZ_GIGAPIXEL")
     if env and os.path.exists(env):
         return env
     for p in TOPAZ_CANDIDATES:
         if os.path.exists(p):
             return p
-    return None
+    return shutil.which("gigapixel")
 
 
 def run_texconv(args):
@@ -68,11 +65,11 @@ def run_topaz(topaz_exe, input_png, scale):
     subprocess.run([topaz_exe, "-i", input_png, "--scale", str(scale), "--overwrite"], check=True)
 
 
-def find_output_png(tmp, suffix, input_mtime):
+def find_output_png(tmp, input_mtime):
     """Find the output PNG after Topaz processing:
     --overwrite means Topaz overwrites the input; otherwise a new file with suffix is produced"""
     # 1) Match by suffix (e.g. input_2x.png)
-    preferred = os.path.join(tmp, f"input{suffix}.png")
+    preferred = os.path.join(tmp, "input_2x.png")
     if os.path.exists(preferred):
         return preferred
     # 2) Input file overwritten by Topaz (mtime changed)
@@ -87,7 +84,7 @@ def find_output_png(tmp, suffix, input_mtime):
     raise RuntimeError("Could not find Topaz output image, please check Topaz output suffix setting")
 
 
-def Upscale(filepath, version, scale, topaz_exe, suffix):
+def Upscale(filepath, version, scale, topaz_exe):
     file = os.path.basename(filepath)
     directory = os.path.dirname(filepath)
     stem = file.split(".tex.")[0] if ".tex." in file else os.path.splitext(file)[0]
@@ -128,7 +125,7 @@ def Upscale(filepath, version, scale, topaz_exe, suffix):
         png_in = os.path.join(tmp, "input.png")
         input_mtime = os.path.getmtime(png_in)
         run_topaz(topaz_exe, png_in, scale)
-        upscaled_png = find_output_png(tmp, suffix, input_mtime)
+        upscaled_png = find_output_png(tmp, input_mtime)
         print(f"      Topaz output: {upscaled_png}")
 
         # 4) PNG -> DDS (re-compress with original format, rebuild mipmaps)
@@ -150,9 +147,9 @@ def Upscale(filepath, version, scale, topaz_exe, suffix):
         out.ConvertToTEX(dds2, stem, "", version, verbose=False)  # Hide conversion debug info
 
         # Write new file to same directory temp file first (avoid cross-disk move), then swap with original:
-        # Original file backed up as {stem}_bak.tex.{version} (extension unchanged), new file replaces original path
+        # Original file backed up as {stem}.tex_bak{version}, new file replaces original path
         original_path = os.path.abspath(filepath)
-        backup_path = os.path.join(directory, f"{stem}{BACKUP_TAG}.tex.{version}")
+        backup_path = os.path.join(directory, f"{stem}.tex{BACKUP_TAG}.{version}")
         tmp_out = os.path.join(directory, f".{stem}.tex.{version}.tmp")
 
         try:
@@ -178,14 +175,13 @@ if __name__ == "__main__":
     parser.add_argument("-version", default="", help="Game version number (without dot), auto-detected from filename if omitted")
     parser.add_argument("--scale", type=float, default=1.5, help="Upscale factor (default 1.5)")
     parser.add_argument("--topaz-exe", default=None, help="Full path to Topaz gigapixel.exe")
-    parser.add_argument("--suffix", default=DEFAULT_SUFFIX, help="Topaz output filename suffix (default _2x)")
     args = parser.parse_args()
 
     start = time.time()
     version = args.version or guess_version(args.file)
 
     try:
-        Upscale(args.file, version, args.scale, args.topaz_exe, args.suffix)
+        Upscale(args.file, version, args.scale, args.topaz_exe)
     except Exception as e:
         print(f"✗ Error: {e}")
         os.system("pause")

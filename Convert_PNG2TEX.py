@@ -14,7 +14,7 @@ GAME = "RE4R"
 EXTENSION = ".143221013"
 # 使用的压缩格式（DXGI 名称，texconv -f 可识别）
 FORMAT = "BC7_UNORM"
-# 备份后缀（追加在文件名主干后，扩展名不变）
+# 备份后缀（追加在完整文件名后，扩展名保留）
 BACKUP_TAG = "_bak"
 
 
@@ -58,14 +58,14 @@ def ConvertPNGtoTEX(filepath):
         tex = TEX()
         tex.ConvertToTEX(dds, stem, GAME, EXTENSION.lstrip("."), verbose=False)
 
-        # 先写临时文件再替换，避免跨盘移动；若原 .tex 已存在则备份为 {stem}_bak.tex.{version}（扩展名不变）
+        # 先写临时文件再替换，避免跨盘移动；若原 .tex 已存在则备份为 {stem}.tex_bak{EXTENSION}
         tmp_out = os.path.join(directory, f".{stem}.tex{EXTENSION}.tmp")
         try:
             with open(tmp_out, "wb") as f:
                 tex.WriteTEX(f)
 
             if os.path.exists(out_path):
-                backup_path = os.path.join(directory, f"{stem}{BACKUP_TAG}.tex{EXTENSION}")
+                backup_path = os.path.join(directory, f"{stem}.tex{BACKUP_TAG}{EXTENSION}")
                 if os.path.exists(backup_path):
                     os.remove(backup_path)  # 旧备份覆盖，仅保留最近一次的原文件
                 os.replace(out_path, backup_path)  # 原 .tex -> _bak 备份

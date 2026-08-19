@@ -1,9 +1,9 @@
 import struct
+import re
 
+from dxgiFormat import *
 from Helpers import *
 from enum import *
-import re
-from dxgiFormat import *
 
 
 class TEX:
@@ -19,13 +19,10 @@ class TEX:
         self.SwizzleControl = b"\xFF" * 4
         self.CubemapMarker = 0
         self.Unk = b''
-        
         self.UnkSwizzle = b''
-        
         self.MipmapOffsets = [] # offset to each mipmap level
         self.MipmapPitch = [] # how many bytes per a row of blocks (if compressed BCn), how many bytes per a row of pixels (if not compressed)
         self.MipmapLinearSize = [] # Size of one mipmap level in bytes
-        
         self.dataTEX = b''
         
         
@@ -183,4 +180,6 @@ class TEX:
             write_uint(f, self.MipmapLinearSize[i])
             
         f.write(self.dataTEX)
+
+
 
