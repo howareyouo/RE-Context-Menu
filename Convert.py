@@ -45,7 +45,7 @@ def Convert(Filepath, Game, Version, DDS, TEX):
             dds.WriteDDSData(f) # Write DDS Data
             
     else:
-        print(f"Unsupported file type: {Extension}")
+        raise ValueError(f"Unsupported file type: {Extension}")
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -63,13 +63,16 @@ if __name__ == "__main__":
    
     start = time.time()
     
-    Convert(args.file, args.game, args.version, DDS, TEX)
+    try:
+        Convert(args.file, args.game, args.version, DDS, TEX)
+    except Exception as e:
+        print(f"\n✗ Error: {e}")
+        os.system("pause")
+        sys.exit(1)
     
     end = time.time()
     
     print(f"\nCode finished in {end - start} seconds\n")
-    
-    input("Press Enter to exit...")
         
 
         

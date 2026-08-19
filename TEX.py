@@ -77,7 +77,7 @@ class TEX:
    
         
     
-    def ConvertToTEX(self, DDS, Filename, Game, Version):
+    def ConvertToTEX(self, DDS, Filename, Game, Version, verbose=True):
         self.Magic = b'TEX\x00'
         self.Version = int(Version)
         self.Width = DDS.Width
@@ -113,7 +113,8 @@ class TEX:
         
         width = self.Width
         height = self.Height
-        print(width, height)
+        if verbose:
+            print(width, height)
         
         base = 0x20 + extra + 16 * self.MipmapCount
         mipmap_sizes = 0
@@ -123,12 +124,14 @@ class TEX:
             num_blocks_wide = math.ceil(width / 4) # How many blocks in a row, round up to nearest integer to avoid not having enough blocks
             num_blocks_tall = math.ceil(height / 4) # How many blocks in a column, round up to nearest integer to avoid not having enough blocks
             
-            print(num_blocks_wide, num_blocks_tall)
+            if verbose:
+                print(num_blocks_wide, num_blocks_tall)
             
             if re.search(r"BC[1-7]", key):
                 self.MipmapPitch.append(num_blocks_wide * (4 * 4)) # How many bytes in a row of blocks (for compressed BCn formats only)
                 
-                print(self.MipmapPitch[i])
+                if verbose:
+                    print(self.MipmapPitch[i])
                 
                 self.MipmapLinearSize.append(num_blocks_wide * num_blocks_tall * byte_size) # Size of one mipmap level in bytes
                 
@@ -140,7 +143,8 @@ class TEX:
             
             mipmap_sizes += self.MipmapLinearSize[i]
             
-            print(f"Mip {i:2d}: {width:4d} x {height:4d}  →  {num_blocks_wide}x{num_blocks_tall} blocks  →  {self.MipmapLinearSize} bytes")
+            if verbose:
+                print(f"Mip {i:2d}: {width:4d} x {height:4d}  →  {num_blocks_wide}x{num_blocks_tall} blocks  →  {self.MipmapLinearSize} bytes")
             
             width = max(1, width//2)
             height = max(1, height//2)
