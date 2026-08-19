@@ -21,8 +21,8 @@ EXTENSIONS = [
 ]
 
 for game in EXTENSIONS:
-    ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\Convert to DDS")
     ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\AI Upscale")
+    ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\Convert to DDS")
     ALL_PATHS.append(f"SOFTWARE\\Classes\\SystemFileAssociations\\{game[1]}\\shell\\Convert to PNG")
             
 # ===================================================
@@ -340,8 +340,8 @@ def main():
         print("\nStarting installation...\n")
 
         add_context_menu(games) # e.g.: .11
-        add_dds_context_menu(games)
         add_upscale_context_menu(games)
+        add_dds_context_menu(games)
         add_png_context_menu(games)
  
     elif register == "n":
